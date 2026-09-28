@@ -13,41 +13,19 @@ This repository contains the complete, production-grade implementation of the **
 
 ## Table of Contents
 
-- [1. Executive Summary & Evaluation Scorecard](#1-executive-summary--evaluation-scorecard)
-- [2. System Architecture](#2-system-architecture)
-- [3. Multi-Module Project Structure](#3-multi-module-project-structure)
-- [4. Module 1: `employee-library` (Artifact Provider)](#4-module-1-employee-library-artifact-provider)
-- [5. Module 2: Sonatype Nexus 3 Hosted Repository](#5-module-2-sonatype-nexus-3-hosted-repository)
-- [6. Module 3: `employee-redis-app` (Consumer & Cache Service)](#6-module-3-employee-redis-app-consumer--cache-service)
-- [7. Redis Caching Behavior & Lifecycle](#7-redis-caching-behavior--lifecycle)
-- [8. REST API Reference](#8-rest-api-reference)
-- [9. Step-by-Step Setup & Execution Guide](#9-step-by-step-setup--execution-guide)
-- [10. Testing & Verification Evidence](#10-testing--verification-evidence)
-- [11. Deliverables Checklist](#11-deliverables-checklist)
+- [1. System Architecture](#1-system-architecture)
+- [2. Multi-Module Project Structure](#2-multi-module-project-structure)
+- [3. Module 1: `employee-library` (Artifact Provider)](#3-module-1-employee-library-artifact-provider)
+- [4. Module 2: Sonatype Nexus 3 Hosted Repository](#4-module-2-sonatype-nexus-3-hosted-repository)
+- [5. Module 3: `employee-redis-app` (Consumer & Cache Service)](#5-module-3-employee-redis-app-consumer--cache-service)
+- [6. Redis Caching Behavior & Lifecycle](#6-redis-caching-behavior--lifecycle)
+- [7. REST API Reference](#7-rest-api-reference)
+- [8. Step-by-Step Setup & Execution Guide](#8-step-by-step-setup--execution-guide)
+- [9. Testing & Verification Evidence](#9-testing--verification-evidence)
 
 ---
 
-## 1. Executive Summary & Evaluation Scorecard
-
-This project was built strictly against the **10 Evaluation Criteria (100 Marks Total)**:
-
-| # | Evaluation Criterion | Weight | Fulfillment Details in This Repository | Status |
-|---|----------------------|--------|----------------------------------------|--------|
-| **1** | **Employee Library Implementation** | **10%** | Comprehensive domain models (`Department`, `EmployeeStatus`), DTOs (`EmployeeDto`, `EmployeeRequest`, `EmployeeResponse`, `ApiResponse`), custom exceptions (`EmployeeNotFoundException`, `DuplicateEmployeeException`, `InvalidEmployeeDataException`), custom validator (`@ValidEmployeeCode`), and utility methods (`EmployeeUtils` code generator, bonus calculator, email masking). 14 automated tests passing. | ✅ **10/10** |
-| **2** | **Nexus Hosted Repository Configuration** | **15%** | `docker-compose.yml` spinning up Sonatype Nexus 3 (`sonatype/nexus3:3.70.1`). Configured hosted release repository (`maven-releases`) with *Allow Redeploy*, hosted snapshot repository (`maven-snapshots`), and group repository (`maven-public`). Automated health and bootstrap script (`nexus/setup-nexus.ps1`). | ✅ **15/15** |
-| **3** | **Artifact Publishing to Nexus** | **10%** | Configured `distributionManagement` in `employee-library/pom.xml`, credentials mapped in `nexus/settings.xml` under server IDs `nexus-releases` and `nexus-snapshots`. Sources JAR attachment configured via `maven-source-plugin`. | ✅ **10/10** |
-| **4** | **Artifact Consumption from Nexus** | **15%** | `employee-redis-app` specifies dependency `com.nashtech.learning:employee-library:1.0.0` with custom Nexus repository profile. Code cleanly imports and uses library DTOs, validations, exceptions, and utility calculators. | ✅ **15/15** |
-| **5** | **Employee REST APIs** | **10%** | Full CRUD endpoints: `POST /api/employees`, `GET /api/employees/{id}`, `GET /api/employees`, `GET /api/employees?department={dept}`, `PUT /api/employees/{id}`, `DELETE /api/employees/{id}` with standardized JSON `ApiResponse<T>` and `@RestControllerAdvice` error responses. | ✅ **10/10** |
-| **6** | **Redis Configuration** | **10%** | Spring Data Redis with Lettuce connection pool (`RedisConfig.java`), `GenericJackson2JsonRedisSerializer` avoiding unreadable binary blobs, custom cache configuration per cache name (`employees`: 60s, `employeeList`: 30s), resilient error handler preventing app failures when Redis is offline. | ✅ **10/10** |
-| **7** | **`@Cacheable` Implementation** | **10%** | Implemented on `getEmployeeById` (`employees::#id`) and `getAllEmployees` (`employeeList::all`). Logs clearly distinguish between **Cache Miss** (hits DB) and **Cache Hit** (hits Redis memory in ~1.4 ms vs ~15 ms DB fetch, ~10x speedup). | ✅ **10/10** |
-| **8** | **`@CachePut` & `@CacheEvict` Implementation** | **10%** | Implemented `@CachePut` on `updateEmployee` to synchronously update Redis and DB; implemented `@CacheEvict` on `deleteEmployee` (evicts single entry) and list mutations (`allEntries = true` on `employeeList`). Plus `/api/employees/cache/clear` endpoint. | ✅ **10/10** |
-| **9** | **TTL & Cache Expiration Demonstration** | **5%** | Demonstrated in `docs/REDIS_CACHING_DEMONSTRATION.md`, verified via live inspection endpoint `/api/employees/cache/inspect/{id}` showing remaining TTL, and automated benchmark cycle `/api/cache-demo/test-cycle/{id}`. | ✅ **5/5** |
-| **10** | **Documentation & Deliverables** | **5%** | Master `README.md`, detailed `docs/ARCHITECTURE.md`, `docs/REDIS_CACHING_DEMONSTRATION.md`, `docs/API_TESTING_EVIDENCE.md`, `nexus/NEXUS_SETUP_GUIDE.md`, ready-to-run Postman collection and environment, and automated test scripts. | ✅ **5/5** |
-| **Total** | | **100%** | **All 10 Learning Outcomes Fully Implemented and Verified** | **100/100** |
-
----
-
-## 2. System Architecture
+## 1. System Architecture
 
 ```mermaid
 flowchart TB
@@ -92,7 +70,7 @@ flowchart TB
 
 ---
 
-## 3. Multi-Module Project Structure
+## 2. Multi-Module Project Structure
 
 ```text
 NTG-Learning-Spring-Boot-Redis-Nexus-Artifact-Repository/
@@ -157,7 +135,7 @@ NTG-Learning-Spring-Boot-Redis-Nexus-Artifact-Repository/
 
 ---
 
-## 4. Module 1: `employee-library` (Artifact Provider)
+## 3. Module 1: `employee-library` (Artifact Provider)
 
 `employee-library` is a standalone, reusable Java library packaged as `com.nashtech.learning:employee-library:1.0.0`. It contains no database dependencies, ensuring clean separation of concerns.
 
@@ -199,7 +177,7 @@ NTG-Learning-Spring-Boot-Redis-Nexus-Artifact-Repository/
 
 ---
 
-## 5. Module 2: Sonatype Nexus 3 Hosted Repository
+## 4. Module 2: Sonatype Nexus 3 Hosted Repository
 
 The repository infrastructure is orchestrated via Docker Compose:
 
@@ -249,7 +227,7 @@ For complete visual walkthrough and repository setup options, refer to [`nexus/N
 
 ---
 
-## 6. Module 3: `employee-redis-app` (Consumer & Cache Service)
+## 5. Module 3: `employee-redis-app` (Consumer & Cache Service)
 
 ### Consuming `employee-library`
 
@@ -275,7 +253,7 @@ In `employee-redis-app/pom.xml`:
 
 ---
 
-## 7. Redis Caching Behavior & Lifecycle
+## 6. Redis Caching Behavior & Lifecycle
 
 ### Spring Cache Annotation Matrix
 
@@ -298,7 +276,7 @@ In `employee-redis-app/pom.xml`:
 
 ---
 
-## 8. REST API Reference
+## 7. REST API Reference
 
 Base URL: `http://localhost:8080`
 
@@ -319,7 +297,7 @@ Base URL: `http://localhost:8080`
 
 ---
 
-## 9. Step-by-Step Setup & Execution Guide
+## 8. Step-by-Step Setup & Execution Guide
 
 ### Prerequisites
 
@@ -403,7 +381,7 @@ This script automatically executes:
 
 ---
 
-## 10. Testing & Verification Evidence
+## 9. Testing & Verification Evidence
 
 ### Automated Unit & Integration Tests
 
@@ -427,18 +405,3 @@ mvn test
 - [Redis Caching Logs, Latency & TTL Evidence (`docs/REDIS_CACHING_DEMONSTRATION.md`)](docs/REDIS_CACHING_DEMONSTRATION.md)
 - [REST API Catalog & Request/Response Payloads (`docs/API_TESTING_EVIDENCE.md`)](docs/API_TESTING_EVIDENCE.md)
 - [Nexus Setup & Repository Management Guide (`nexus/NEXUS_SETUP_GUIDE.md`)](nexus/NEXUS_SETUP_GUIDE.md)
-
----
-
-## 11. Deliverables Checklist
-
-- [x] **Reusable Library**: `employee-library-1.0.0.jar` with models, DTOs, validations, exceptions, utilities.
-- [x] **Docker Infrastructure**: `docker-compose.yml` for Nexus 3, Redis 7, and Redis Commander.
-- [x] **Nexus Configuration**: `settings.xml`, distribution management, release/snapshot hosted repositories.
-- [x] **Spring Boot Microservice**: `employee-redis-app` consuming library, JPA persistence, REST endpoints.
-- [x] **Redis Caching**: Lettuce connection pool, JSON serializer, per-cache TTL, error resilience.
-- [x] **Spring Cache Annotations**: `@Cacheable`, `@CachePut`, `@CacheEvict`, cache clearing.
-- [x] **Verification Evidence**: Automated benchmark endpoint (`/api/cache-demo/test-cycle/{id}`) and logs.
-- [x] **Postman Collection & Environment**: Exported collection ready for evaluation in `postman/`.
-- [x] **Interactive Scripts**: `demonstrate-caching.ps1` and `demonstrate-caching.sh`.
-- [x] **Master Documentation**: Complete documentation satisfying all 10 evaluation criteria (100 Marks).
