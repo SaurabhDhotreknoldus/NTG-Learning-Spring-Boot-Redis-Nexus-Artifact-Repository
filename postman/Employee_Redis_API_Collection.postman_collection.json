@@ -1,0 +1,208 @@
+{
+  "info": {
+    "_postman_id": "ntg-learning-employee-redis-nexus-api",
+    "name": "Employee Redis & Nexus Assignment API Collection",
+    "description": "Comprehensive Postman Collection covering CRUD REST APIs, Redis Caching (@Cacheable, @CachePut, @CacheEvict), TTL demonstration, and Cache inspection.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "01 - Employee CRUD Operations",
+      "item": [
+        {
+          "name": "Create Employee (POST /api/employees)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"Peter\",\n  \"lastName\": \"Parker\",\n  \"email\": \"peter.parker@nashtechglobal.com\",\n  \"department\": \"ENGINEERING\",\n  \"salary\": 98000.0,\n  \"status\": \"ACTIVE\",\n  \"joiningDate\": \"2023-05-10\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/employees",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "employees"]
+            }
+          }
+        },
+        {
+          "name": "Get Employee by ID - Cacheable (GET /api/employees/1)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/employees/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "employees", "1"]
+            }
+          }
+        },
+        {
+          "name": "Get All Employees (GET /api/employees)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/employees",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "employees"]
+            }
+          }
+        },
+        {
+          "name": "Filter Employees by Department (GET /api/employees?department=ENGINEERING)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/employees?department=ENGINEERING",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "employees"],
+              "query": [
+                { "key": "department", "value": "ENGINEERING" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Employee - CachePut (PUT /api/employees/1)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"Alice\",\n  \"lastName\": \"Johnson\",\n  \"email\": \"alice.johnson@nashtechglobal.com\",\n  \"department\": \"ENGINEERING\",\n  \"salary\": 115000.0,\n  \"status\": \"ACTIVE\",\n  \"joiningDate\": \"2023-01-15\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/employees/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "employees", "1"]
+            }
+          }
+        },
+        {
+          "name": "Delete Employee - CacheEvict (DELETE /api/employees/1)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/employees/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "employees", "1"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "02 - Redis Caching & TTL Verification",
+      "item": [
+        {
+          "name": "Inspect Redis Key & Remaining TTL (GET /api/employees/cache/inspect/1)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/employees/cache/inspect/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "employees", "cache", "inspect", "1"]
+            }
+          }
+        },
+        {
+          "name": "Cache Cycle Benchmark (Miss vs Hit Latency) (GET /api/cache-demo/test-cycle/1)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/cache-demo/test-cycle/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "cache-demo", "test-cycle", "1"]
+            }
+          }
+        },
+        {
+          "name": "Explain Caching Strategy (GET /api/cache-demo/explain)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/cache-demo/explain",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "cache-demo", "explain"]
+            }
+          }
+        },
+        {
+          "name": "Clear All Redis Cache (POST /api/employees/cache/clear)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/employees/cache/clear",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "employees", "cache", "clear"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "03 - Validation & Error Handling",
+      "item": [
+        {
+          "name": "Test Validation Failure - Invalid Salary & Blank Name",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"\",\n  \"lastName\": \"\",\n  \"email\": \"invalid-email\",\n  \"department\": null,\n  \"salary\": 500.0\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/employees",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "employees"]
+            }
+          }
+        },
+        {
+          "name": "Test Duplicate Email Conflict (409)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"Bob\",\n  \"lastName\": \"Smith\",\n  \"email\": \"bob.smith@nashtechglobal.com\",\n  \"department\": \"HUMAN_RESOURCES\",\n  \"salary\": 80000.0\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/employees",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "employees"]
+            }
+          }
+        },
+        {
+          "name": "Test Employee Not Found (404)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/employees/99999",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "employees", "99999"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

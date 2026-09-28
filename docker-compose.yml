@@ -1,0 +1,63 @@
+﻿version: '3.8'
+
+services:
+  # ---------------------------------------------------------------------------
+  # Sonatype Nexus 3 Artifact Repository
+  # Web UI & Maven Repository: http://localhost:8081
+  # ---------------------------------------------------------------------------
+  nexus:
+    image: sonatype/nexus3:3.70.1
+    container_name: ntg-nexus
+    restart: unless-stopped
+    ports:
+      - "8081:8081"
+    volumes:
+      - nexus-data:/nexus-data
+    environment:
+      - INSTALL4J_ADD_VM_PARAMS=-Xms1024m -Xmx1024m -XX:MaxDirectMemorySize=512m
+    networks:
+      - ntg-network
+
+  # ---------------------------------------------------------------------------
+  # Redis Cache Server
+  # Redis Endpoint: localhost:6379
+  # ---------------------------------------------------------------------------
+  redis:
+    image: redis:7.2-alpine
+    container_name: ntg-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes --requirepass ""
+    volumes:
+      - redis-data:/data
+    networks:
+      - ntg-network
+
+  # ---------------------------------------------------------------------------
+  # Redis Commander (Web-based Redis Management UI)
+  # Web UI: http://localhost:8082
+  # ---------------------------------------------------------------------------
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    container_name: ntg-redis-commander
+    restart: unless-stopped
+    environment:
+      - REDIS_HOSTS=local:redis:6379
+    ports:
+      - "8082:8081"
+    depends_on:
+      - redis
+    networks:
+      - ntg-network
+
+volumes:
+  nexus-data:
+    name: ntg-nexus-data
+  redis-data:
+    name: ntg-redis-data
+
+networks:
+  ntg-network:
+    name: ntg-learning-network
+    driver: bridge

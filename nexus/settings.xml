@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<settings xmlns="http://maven.apache.org/SETTINGS/1.2.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.2.0
+                              http://maven.apache.org/xsd/settings-1.2.0.xsd">
+
+    <!-- =================================================================== -->
+    <!-- NEXUS SERVER CREDENTIALS (Matches distributionManagement server IDs) -->
+    <!-- =================================================================== -->
+    <servers>
+        <!-- Server ID for Hosted Releases -->
+        <server>
+            <id>nexus-releases</id>
+            <username>${env.NEXUS_USERNAME:-admin}</username>
+            <password>${env.NEXUS_PASSWORD:-admin123}</password>
+        </server>
+
+        <!-- Server ID for Hosted Snapshots -->
+        <server>
+            <id>nexus-snapshots</id>
+            <username>${env.NEXUS_USERNAME:-admin}</username>
+            <password>${env.NEXUS_PASSWORD:-admin123}</password>
+        </server>
+    </servers>
+
+    <!-- =================================================================== -->
+    <!-- PROFILES FOR CONSUMING ARTIFACTS FROM NEXUS REPOSITORY              -->
+    <!-- =================================================================== -->
+    <profiles>
+        <profile>
+            <id>nexus-profile</id>
+            <repositories>
+                <!-- Nexus Maven Public Group / Hosted Releases -->
+                <repository>
+                    <id>nexus-releases</id>
+                    <name>Nexus Hosted Releases</name>
+                    <url>http://localhost:8081/repository/maven-releases/</url>
+                    <releases>
+                        <enabled>true</enabled>
+                        <updatePolicy>always</updatePolicy>
+                    </releases>
+                    <snapshots>
+                        <enabled>false</enabled>
+                    </snapshots>
+                </repository>
+
+                <repository>
+                    <id>nexus-snapshots</id>
+                    <name>Nexus Hosted Snapshots</name>
+                    <url>http://localhost:8081/repository/maven-snapshots/</url>
+                    <releases>
+                        <enabled>false</enabled>
+                    </releases>
+                    <snapshots>
+                        <enabled>true</enabled>
+                        <updatePolicy>always</updatePolicy>
+                    </snapshots>
+                </repository>
+
+                <repository>
+                    <id>nexus-public</id>
+                    <name>Nexus Public Group</name>
+                    <url>http://localhost:8081/repository/maven-public/</url>
+                    <releases>
+                        <enabled>true</enabled>
+                    </releases>
+                    <snapshots>
+                        <enabled>true</enabled>
+                    </snapshots>
+                </repository>
+            </repositories>
+        </profile>
+    </profiles>
+
+    <activeProfiles>
+        <activeProfile>nexus-profile</activeProfile>
+    </activeProfiles>
+
+</settings>
